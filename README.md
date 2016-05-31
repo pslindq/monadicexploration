@@ -1,3 +1,5 @@
+Marian's Original README follows:
+
 Monadic Exploration
 ===================
 
