@@ -1,7 +1,7 @@
 Monadic Exploration w/.NET Editor and Site Expansion
 ===================
 
-Brought to my attention by members of the College Conference of Composition and Communication, this handy visualization has a great use for us; however, for those not seasoned with JSON formatting, the data file can be beastly to maintain for large sets of data.  I'm attempting to skin the top of this with a very basic user editing platform and database backing to support an entire site of monadic explorations with editing capabilities.  The plan is, in theory, keep it as simple as possible so others can fork it into other languages and expand on the editing concepts and functionality. - Pete
+Brought to my attention by members of the College Conference of Composition and Communication, this handy visualization has a great use for us; however, for those not seasoned with JSON formatting, the data file can be beastly to maintain for large sets of data.  I'm attempting to skin the top of this with a very basic user editing platform and database backing to support an entire site of monadic explorations with editing capabilities.  The plan is, in theory, keep it as simple as possible so others can fork it into other languages, expand on the editing concepts and functionality, or use it/modify it for your own site for all your visualization needs. - Pete
 
 **Marian Dörk's Original README follows:**
 
