@@ -328,7 +328,7 @@ function MonadicNomad() {
 		// window title
 		var name = "Monadic Exploration";
 		if (typeof this.Nodes[this.selected] !== "undefined") name = this.Nodes[this.selected].title;
-		document.title = name;
+		// document.title = name;
 
 		// overlays
 		$("#hint").css({width: this.r, height: this.fs*3, top: this.h/2-this.fs, left: this.w/2-this.r/2, 'font-size': this.fs*1.25});

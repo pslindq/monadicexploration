@@ -1,0 +1,8 @@
+footer p{
+    position:fixed;
+    right:0;
+    bottom:0;
+    font-size:.8em;
+    color:#bbbbbb;
+    padding-right:1em;
+}
