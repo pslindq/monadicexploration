@@ -5,4 +5,5 @@ footer p{
     font-size:.8em;
     color:#bbbbbb;
     padding-right:1em;
+     z-index:4;
 }

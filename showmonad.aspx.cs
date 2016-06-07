@@ -11,6 +11,7 @@ public partial class ShowMonadPage : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
+        // If not postback...
         if (!this.IsPostBack)
         {
             // Is there a request in the query string?
@@ -30,11 +31,9 @@ public partial class ShowMonadPage : System.Web.UI.Page
                     }
                     else
                     {
-                        // Populate the visualization config scripts
-                        WebControl configJSScript = (WebControl) this.Header.FindControl("configJSFile");
+                        // Populate the visualization config scripts for the header
                         configScriptLink.Text = configScriptLink.Text.Replace("@@QUERYSTRING@@", ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + monad.URLSegment);
-                        // Initialize the client site routine for the visualization
-                        ClientScript.RegisterStartupScript(this.GetType(), "init", "init();", true);
+                        // Set our noted title from the database record
                         this.Title = monad.Title;
                     }
                 }

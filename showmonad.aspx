@@ -1,7 +1,5 @@
 ﻿<%@ Page  Language="C#" AutoEventWireup="true" CodeFile="showmonad.aspx.cs" Inherits="ShowMonadPage" %>
-
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title></title>
@@ -23,18 +21,19 @@
     }
 </script>
 </head>
-<body>
+<body onload="init()">
     <form id="form1" runat="server">
         <nav id="info">
 	        <h1></h1>
 	        <ul></ul>
         </nav>
         <div class="overlay" id="hint">
-	        <input type="search" results name="search" value="" id="search" placeholder='search'>		
+	        <input type="search" name="search" value="" id="search" placeholder='search'>		
         </div>	
         <div id="canvas"></div>
         <footer>
-            <p>Icons designed by <a href="http://www.freepik.com/" target="_blank">Freepik</a></p>
+            <p>[Most] Icons Designed by <a href="http://www.freepik.com/" target="_blank">Freepik</a></p>
+            <!-- Note: Required by license - psl -->
         </footer>
     </form>
 </body>

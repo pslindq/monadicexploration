@@ -55,7 +55,11 @@ function MonadicNomad() {
 		else if (type=="js")  jQuery.getScript("app/"+app.dataFile, function(){
 			that.init(data);
 		});
-
+		// Added - psl 6/6/2016 to support aspx .net generated json
+        // note we substring here as this filters out the query string
+		else if (type.substr(0,4)=="aspx") jQuery.getJSON(app.dataFile, function(data){
+		    that.init(data);
+		});
 	}
 
 	// set up variables

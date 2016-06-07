@@ -50,13 +50,13 @@ public partial class MonadModel : DbContext
             .IsUnicode(false);
 
         modelBuilder.Entity<Node>()
-            .HasMany(e => e.NodeLinks)
+            .HasMany(e => e.NodeLinks1)
             .WithRequired(e => e.Node)
             .HasForeignKey(e => e.NodeID1)
             .WillCascadeOnDelete(false);
 
         modelBuilder.Entity<Node>()
-            .HasMany(e => e.NodeLinks1)
+            .HasMany(e => e.NodeLinks2)
             .WithRequired(e => e.Node1)
             .HasForeignKey(e => e.NodeID2)
             .WillCascadeOnDelete(false);

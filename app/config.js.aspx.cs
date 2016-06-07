@@ -33,13 +33,16 @@ public partial class ConfigJSPage : System.Web.UI.Page
                         Response.Write(
                             "var app = { };" +
                             "app.node_types = [");
+                        // Loop through the node types and generate the records for the javascript array
                         int x = 0;
                         foreach (NodeType nodetype in monad.NodeTypes.OrderBy(s => s.Sequence))
                         {
+                            // Commit this to the response stream
                             Response.Write("{slug:'" + nodetype.SlugName + "',name:'" + nodetype.Name + "',names:'" + nodetype.PluralName + "',color:'#" + nodetype.Color + "'}");
                             if(x != monad.NodeTypes.Count - 1) Response.Write(",");
                             x++;
                         }
+                        // And wrap it up...
                         Response.Write(
                             "];" +
                             "app.dataFile = '/app/data.json.aspx?" + ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + monad.URLSegment + "'; " +
@@ -47,6 +50,7 @@ public partial class ConfigJSPage : System.Web.UI.Page
                             "app.title = '" + monad.Title + "'; " +
                             "app.url = '" + monad.URL + "'; "
                         );
+                        Response.End();
                     }
                 }
             }
