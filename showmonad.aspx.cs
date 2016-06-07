@@ -21,7 +21,6 @@ public partial class ShowMonadPage : System.Web.UI.Page
                 string monadURL = Request[ConfigurationManager.AppSettings["MonadQueryStringParam"]];
                 using (MonadModel context = new MonadModel())
                 {
-                    // Pull and sort by title for ease of finding things first
                     Monad monad = context.Monads.FirstOrDefault(s => s.URLSegment == monadURL);
                     if (monad == null)
                     {
@@ -35,6 +34,8 @@ public partial class ShowMonadPage : System.Web.UI.Page
                         configScriptLink.Text = configScriptLink.Text.Replace("@@QUERYSTRING@@", ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + monad.URLSegment);
                         // Set our noted title from the database record
                         this.Title = monad.Title;
+                        // Set the edit link
+                        editLink.HRef = "/" + monad.URLSegment + "/" + editLink.HRef;
                     }
                 }
             }

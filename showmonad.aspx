@@ -23,6 +23,9 @@
 </head>
 <body onload="init()">
     <form id="form1" runat="server">
+        <header>
+            <p><a id="editLink" runat="server" href="admin">[Edit]</a></p>
+        </header>
         <nav id="info">
 	        <h1></h1>
 	        <ul></ul>

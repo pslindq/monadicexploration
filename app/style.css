@@ -7,3 +7,21 @@ footer p{
     padding-right:1em;
      z-index:4;
 }
+header p{
+    position:fixed;
+    right:0;
+    top:0;
+    font-size:.8em;
+    color:#bbbbbb;
+    padding-right:1em;
+     z-index:4;
+}
+p.error{
+    color:darkred;
+    font-weight:bold;
+}
+span.required{
+    font-weight:bold;
+    color:darkred;
+    font-size:.8em;
+}

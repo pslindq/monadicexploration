@@ -12,11 +12,18 @@
             // So what are we looking for?
             if (originalURL == "/admin")
             {
-                // TODO: send to login to create new monad (top level)
+                 // Go to the login page and request master password
+                 Context.RewritePath("/login.aspx?" + ConfigurationManager.AppSettings["ForceMasterQueryStringParam"] + "=true");
             }
             else if (originalURL.EndsWith("/admin"))
             {
-                // TODO: send to login to edit existing monad (top level)
+                // Go to the login page and request monad password (or master if they have it)
+                 Context.RewritePath("/login.aspx?" + ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + originalURL.Replace("/admin","").Replace("/",""));
+            }
+            else if (originalURL == "/logout")
+            {
+                // Go to the logout page
+                Context.RewritePath("/logout.aspx?");
             }
             else
             {

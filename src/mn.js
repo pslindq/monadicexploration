@@ -276,7 +276,13 @@ function MonadicNomad() {
 
 		// fill legend
 		var projectlink = "<span>a <a href='http://mariandoerk.de/monadicexploration/'>monadic exploration</a> of</span><br>";
-		$("#info h1").append(projectlink+"<a href='"+app.url+"'>"+app.title+"</a>");
+	    // ADDED to account for non-linked title - psl 6/7/2016
+		if (app.url==null||app.url.length == 0)
+		{
+		    $("#info h1").append(projectlink+app.title);
+		} else {
+		    $("#info h1").append(projectlink+"<a href='"+app.url+"'>"+app.title+"</a>");
+		}
 		if (app.showType) {
 			for (var i = 0; i < app.node_types.length; i++) {
 				var type = app.node_types[i];			

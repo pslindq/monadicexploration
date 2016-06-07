@@ -17,7 +17,7 @@ public partial class DefaultHomePage : System.Web.UI.Page
             // Pull and sort by title for ease of finding things first
             var monads = from s in context.Monads
                          select s;
-            monads.OrderBy(s => s.Title);
+            monads = monads.OrderBy(s => s.Title);
             availableMonads.DataSource = monads.ToArray();
             availableMonads.DataBind();
         }

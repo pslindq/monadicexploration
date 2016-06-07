@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Monadic Explorations | Main Listing</title>
+    <title>Monadic Explorations - Listing of Available Visualizations</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="src/style.css" rel="stylesheet" />
 </head>
@@ -15,9 +15,10 @@
         <asp:Repeater ID="availableMonads" runat="server" OnItemDataBound="availableMonads_ItemDataBound">
             <HeaderTemplate>
                 <ul>
+                    <li><a href="/admin">[Create New]</a></li>
             </HeaderTemplate>
             <ItemTemplate>
-                <li><a runat="server" id="anchor"></a></li>
+                    <li><a runat="server" id="anchor"></a></li>
             </ItemTemplate>
             <FooterTemplate>
                 </ul>
