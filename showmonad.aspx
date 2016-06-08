@@ -24,7 +24,7 @@
 <body onload="init()">
     <form id="form1" runat="server">
         <header>
-            <p><a id="editLink" runat="server" href="admin">[Edit]</a></p>
+            <p><a href="/default.aspx">[Home]</a> | <a id="editLink" runat="server" href="admin">[Edit]</a></p>
         </header>
         <nav id="info">
 	        <h1></h1>

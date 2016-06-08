@@ -41,7 +41,7 @@ public partial class LoginPage : System.Web.UI.Page
                 if ((string)Session[ConfigurationManager.AppSettings["SessionPasswordKey"]] == ConfigurationManager.AppSettings["MasterPassword"])
                 {
                     // Yep! Top-level master so transfer this request...
-                    Server.Transfer("/edit.aspx", false);
+                    Server.Transfer("/edit.aspx?" + ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + Request[ConfigurationManager.AppSettings["MonadQueryStringParam"]], false);
                 }
                 else
                 {
@@ -59,7 +59,7 @@ public partial class LoginPage : System.Web.UI.Page
                         else if (Session[ConfigurationManager.AppSettings["SessionPasswordKey"]]!=null&&(string)Session[ConfigurationManager.AppSettings["SessionPasswordKey"]]==monad.AdminPWD)
                         {
                             // Yep! Monad level admin pwd so transfer this request...
-                            Server.Transfer("/edit.aspx", false);
+                            Server.Transfer("/edit.aspx?" + ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + Request[ConfigurationManager.AppSettings["MonadQueryStringParam"]], false);
                         }
                         else
                         {
@@ -107,7 +107,7 @@ public partial class LoginPage : System.Web.UI.Page
             {
                 // Yep!  Save this password to the session and transfer this request...
                 Session[ConfigurationManager.AppSettings["SessionPasswordKey"]] = password.Text;
-                Server.Transfer("/edit.aspx", false);
+                Server.Transfer("/edit.aspx?" + ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + Request[ConfigurationManager.AppSettings["MonadQueryStringParam"]], false);
             }
             else
             {
@@ -126,7 +126,7 @@ public partial class LoginPage : System.Web.UI.Page
                     {
                         // Yep! Monad level admin pwd so transfer this request...
                         Session[ConfigurationManager.AppSettings["SessionPasswordKey"]] = password.Text;
-                        Server.Transfer("/edit.aspx", false);
+                        Server.Transfer("/edit.aspx?" + ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + Request[ConfigurationManager.AppSettings["MonadQueryStringParam"]], false);
                     }
                     else
                     {

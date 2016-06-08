@@ -11,7 +11,7 @@ public partial class CreateMonadPage : System.Web.UI.Page
     protected void Page_Load(object sender, EventArgs e)
     {
         // Test for the password first - make sure an admin is logged in
-        if ((string)Session[ConfigurationManager.AppSettings["SessionPasswordKey"]] != ConfigurationManager.AppSettings["MasterPassword"])
+        if (Session[ConfigurationManager.AppSettings["SessionPasswordKey"]] == null || (string)Session[ConfigurationManager.AppSettings["SessionPasswordKey"]] != ConfigurationManager.AppSettings["MasterPassword"])
         {
             // Redirect to the login as this isn't a valid authentication to be here
             Response.Redirect("/admin", true);
@@ -49,5 +49,10 @@ public partial class CreateMonadPage : System.Web.UI.Page
                 // May not be all to friendly, but we aren't worried about UX in this
             }
         }
+    }
+
+    protected void cancelButton_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("/default.aspx");
     }
 }

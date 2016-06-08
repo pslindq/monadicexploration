@@ -10,7 +10,7 @@
 <body>
     <form id="form1" runat="server">
         <h1><asp:Literal ID="headingText" runat="server">Monadic Explorations - Create Monad</asp:Literal></h1>
-        <p>Please provide the following to set up a shell monadic visualization.</p>
+        <p>Please provide the following to set up a shell visualization:</p>
         <asp:Literal ID="errorText" runat="server" Mode="PassThrough"></asp:Literal>
         <p>
             <strong><asp:Label ID="titleLabel" AssociatedControlID="title" runat="server" Text="Monad Title:"></asp:Label></strong>
@@ -36,8 +36,9 @@
             <asp:CheckBox ID="showNodeTypesFlag" runat="server" Text="Show Node Types:" TextAlign="Left" Font-Bold="true" Checked="true" />
         </p>
         <p>
-            <asp:Button ID="submitButton" CausesValidation="true" OnClick="submitButton_Click" runat="server" Text="Create" />
+            <asp:Button ID="submitButton" CausesValidation="true" OnClick="submitButton_Click" runat="server" Text="Create the New Monad" />
         </p>
+        <p>or <asp:Button ID="cancelButton" CausesValidation="false" runat="server" OnClick="cancelButton_Click" Text="Cancel" /> creating the visualization and return to the main menu.</p>
     </form>
 </body>
 </html>

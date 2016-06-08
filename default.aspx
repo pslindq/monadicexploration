@@ -11,7 +11,7 @@
 <body>
     <form id="form1" runat="server">
         <h1>Monadic Explorations - Listing of Available Visualizations</h1>
-        <p>Select from the available visualizations:</p>
+        <p>Select from the available visualizations to view, or log in to create a new one:</p>
         <asp:Repeater ID="availableMonads" runat="server" OnItemDataBound="availableMonads_ItemDataBound">
             <HeaderTemplate>
                 <ul>

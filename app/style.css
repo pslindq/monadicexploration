@@ -20,8 +20,22 @@ p.error{
     color:darkred;
     font-weight:bold;
 }
+p.confirm{
+    color:darkgreen;
+    font-weight:bold;
+}
 span.required{
     font-weight:bold;
     color:darkred;
     font-size:.8em;
+}
+div.editscrn{
+    width:auto;
+    height:auto;
+}
+span.order{
+    font-weight:bold;
+}
+span.order a{
+    text-decoration:none;
 }
