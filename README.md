@@ -1,20 +1,19 @@
 Monadic Exploration w/.NET Editor and Site Expansion
 ===================
 
-Brought to my attention by members of the College Conference of Composition and Communication, this handy visualization has a great uses; however, for those not seasoned with JSON formatting, the data file can be beastly to maintain for large sets of data.  I attempted to skin the top of this with a very basic user editing platform and database backing to support an entire site of monadic explorations via extensionless URL rewriting with editing capabilities.  The plan was, in theory, keep it as simple as possible so others can fork it into other languages and expand on the editing concepts and functionality.  Emphasis was more on converting the data.json into a database schema and the functionality of editing it.  Minimal focus was put on user entry error, validation, and editing UX as that's a subjective area, and everyone has their own modus operandi in that realm.
+Brought to our attention by the College Conference of Composition and Communication, this handy visualization has a great number of uses; however, for those not seasoned with JSON formatting, the data file can be beastly to maintain for large sets of data.  I attempted to skin the top of this with a very basic user editing platform and database backing to support an entire site of monadic explorations via extensionless URL rewriting with editing capabilities.  The plan was, in theory, keep it as simple as possible so others can fork it into other languages and expand on the editing concepts and functionality.  Emphasis was more on converting the data.json into a database schema and the functionality of editing it.  Minimal focus was put on user entry error, validation, and editing UX as that's a subjective area, and everyone has their own modus operandi in that realm.
 
 Basic Operations
 --------------------
-If you want to view the original project files, I retained them, and they are accessible from the root of the project at */index.html*.  For the editable version (and forgive me if I leave testing data in the database) that supports password-enabled editing access and multiple monad visualizations based on URL segments, start your journey from */default.aspx*.
+If you want to view the original project files, I retained them herein, and they are accessible from the root of the project at */index.html*.  For the editable version (and forgive me if I leave testing data in the database) that supports password-enabled editing access and multiple monad visualizations based on URL segments, start your journey from */default.aspx*.
 
-At this root page, you can select from all known visualizations stored in the database or create a new one.  To create a new one, provide the "master password" as defined in the */web.config* file and follow the prompted directions on the form.  If you select one of the existing visualizations, use the link that appears in the upper right of the visualization page to enter edit mode.  **Note** - to edit in individual visualization you need either the master password or the monad-specific password as defined in the database (currently stored in the clear).  Again, with editing, follow the prompted directions as they are fairly self-explanatory.
+At this root page, you can select from all known visualizations stored in the database or create a new one.  To create a new one, provide the "master password" as defined in the */web.config* file and follow the prompted directions on the form.  If you select one of the existing visualizations, use the link that appears in the upper right of the visualization page to enter edit mode.  **Note** - to edit an individual visualization you need either the master password or the monad-specific password as defined in the database (currently stored in the clear for simplicity).  Again, with editing, follow the prompted directions as they are fairly self-explanatory.
 
 Other Project References
 --------------------
 [.NET Json serialization via Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)  
 [Entity Framework v6.1.3](https://msdn.microsoft.com/en-us/data/ef.aspx)
 
-**SPECIAL NOTE:** Yes... there are areas redundant code can be reduced, and it's not that secure.  Again, emphasis was to get a working codebase out there for everyone else to do with as they please. Deuces. 
 
 **Marian Dörk's Original README follows:**
 
