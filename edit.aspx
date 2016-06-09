@@ -8,6 +8,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="/src/style.css" rel="stylesheet" />
     <link href="/app/style.css" rel="stylesheet" />
+    <style>
+        body{overflow:scroll;}
+    </style>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -61,13 +64,13 @@
                 </HeaderTemplate>
                 <ItemTemplate>
                         <li>
-                            <asp:LinkButton ID="nodeTypeEdit" runat="server" OnClick="nodeTypeEdit_Click">Name [and color] of Node Type</asp:LinkButton> 
                             <span class="order"><asp:LinkButton ID="nodeTypeUp" runat="server" OnClick="nodeTypeUp_Click" ToolTip="Move this type up the list">&#8679;</asp:LinkButton>
                             <asp:LinkButton ID="nodeTypeDown" runat="server" OnClick="nodeTypeDown_Click" ToolTip="Move this type down the list">&#8681;</asp:LinkButton></span>
+                            <asp:LinkButton ID="nodeTypeEdit" runat="server" OnClick="nodeTypeEdit_Click">Name [and color] of Node Type</asp:LinkButton> 
                         </li>
                 </ItemTemplate>
                 <FooterTemplate>
-                        <li><asp:LinkButton runat="server">[Add a New Node Type]</asp:LinkButton></li>
+                        <li><asp:LinkButton ID="nodeTypeAdd" runat="server" OnClick="nodeTypeEdit_Click">[Add a New Node Type]</asp:LinkButton></li>
                     </ul>
                 </FooterTemplate>
             </asp:Repeater>
@@ -76,8 +79,47 @@
             </p>
         </asp:Panel>
         <asp:Panel ID="editNodeTypeScreen" runat="server" Visible="false" CssClass="editscrn">
+            <p>Please use the following elements to define this node type:</p>
+            <p>
+                <strong><asp:Label ID="nodeTypeNameLabel" AssociatedControlID="nodeTypeName" runat="server" Text="Node Type Name:"></asp:Label></strong>
+                <asp:TextBox ID="nodeTypeName" runat="server"></asp:TextBox> 
+                <asp:RequiredFieldValidator Display="Dynamic" ID="nodeTypeNameValidator" runat="server" ControlToValidate="nodeTypeName" SetFocusOnError="true"><span class="required">* Required</span></asp:RequiredFieldValidator>
+            </p>
+            <p>
+                <strong><asp:Label ID="nodeTypePluralNameLabel" AssociatedControlID="nodeTypePluralName" runat="server" Text="Plural Name:"></asp:Label></strong>
+                <asp:TextBox ID="nodeTypePluralName" runat="server"></asp:TextBox> 
+                <asp:RequiredFieldValidator Display="Dynamic" ID="nodeTypePluralNameValidator" runat="server" ControlToValidate="nodeTypePluralName" SetFocusOnError="true"><span class="required">* Required</span></asp:RequiredFieldValidator>
+            </p><p>
+                <strong><asp:Label ID="slugNameLabel" AssociatedControlID="slugName" runat="server" Text="Slug (Icon) Name:"></asp:Label></strong>
+                <asp:TextBox ID="slugName" runat="server" ReadOnly="true"></asp:TextBox>  
+                <asp:Button CausesValidation="false" ID="slugSelectionButton" runat="server" OnClick="slugSelectionButton_Click" Text="Select Image..." />
+                <asp:RequiredFieldValidator Display="Dynamic" ID="slugNameValidator" runat="server" ControlToValidate="slugName" SetFocusOnError="true"><span class="required">* Required</span></asp:RequiredFieldValidator><br />
+                <span id="slugSample" runat="server"></span>
+            </p>
+            <p>
+                <strong><asp:Label ID="nodeTypeColorLabel" AssociatedControlID="nodeTypeColor" runat="server" Text="Color:"></asp:Label></strong>
+                <input type="color" name="nodeTypeColor" id="nodeTypeColor" runat="server" value="#000000" /><br />
+                <em>Please Note: The HTML5 color selection input sadly does not work in Safari or IE. <br />
+                    Please use <a href="http://www.color-hex.com/">hexcode</a> for your color indications if it isn't available.</em>
+            </p>
+            <p>
+                <asp:Button ID="saveNodeTypeButton" CausesValidation="true" OnClick="saveNodeTypeButton_Click" runat="server" Text="Save the Updated Information" />
+                or
+                <asp:Button ID="cancelNodeTypeButton" CausesValidation="false" runat="server" OnClick="cancelButton_Click" Text="Cancel Editing" />
+            </p>
         </asp:Panel>
         <asp:Panel ID="slugSelectionScreen" runat="server" Visible="false" CssClass="editscrn">
+            <p>Please select the image you would like to use for the node type slug:</p>
+            <asp:Repeater ID="slugList" runat="server" OnItemDataBound="slugList_ItemDataBound">
+                <HeaderTemplate><p></HeaderTemplate>
+                <ItemTemplate>
+                    <asp:LinkButton ID="slugSelectButton" runat="server" OnClick="slugSelectButton_Click"></asp:LinkButton>
+                </ItemTemplate>
+                <FooterTemplate></p><div style="clear:left;"></div></FooterTemplate>
+            </asp:Repeater>
+            <p>
+                <asp:Button ID="cancelSlugSelectButton" CausesValidation="false" runat="server" OnClick="cancelButton_Click" Text="Cancel Slug Selection" />
+            </p>
         </asp:Panel>
         <asp:Panel ID="listNodesScreen" runat="server" Visible="false" CssClass="editscrn">
         </asp:Panel>
