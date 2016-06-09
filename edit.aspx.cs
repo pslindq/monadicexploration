@@ -42,6 +42,9 @@ public partial class EditMonadPage : System.Web.UI.Page
         }
     }
 
+    /// <summary>
+    /// When the page loads...
+    /// </summary>
     protected void Page_Load(object sender, EventArgs e)
     {
         // Test for the password first - make sure an admin is logged in
@@ -290,7 +293,7 @@ public partial class EditMonadPage : System.Web.UI.Page
                 nodeTypeColor.Value = "#" + nt.Color;
                 slugName.Text = nt.SlugName;
                 slugSample.Attributes["style"] = "display:block;background-color:black;height:50px;width:50px;background-size:100%;background-image:url('/app/img/" + slugName.Text + ".png');border-radius:50%;";
-                //And store the ID of this nodetype in the viewstate
+                // And store the ID of this nodetype in the viewstate
                 ViewState["EditingNodeType"] = nt.NodeTypeID;
                 // We'll need this later for saving
             }
