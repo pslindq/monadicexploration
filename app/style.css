@@ -29,7 +29,8 @@ span.required{
     color:darkred;
     font-size:.8em;
 }
-div.editscrn{
+div.editscrn,
+div.editscrn div{
     width:auto;
     height:auto;
 }

@@ -68,7 +68,7 @@
                         <li>
                             <span class="order"><asp:LinkButton ID="nodeTypeUp" runat="server" OnClick="nodeTypeUp_Click" ToolTip="Move this type up the list">&#8679;</asp:LinkButton>
                             <asp:LinkButton ID="nodeTypeDown" runat="server" OnClick="nodeTypeDown_Click" ToolTip="Move this type down the list">&#8681;</asp:LinkButton></span>
-                            <asp:LinkButton ID="nodeTypeEdit" runat="server" OnClick="nodeTypeEdit_Click">Name [and color] of Node Type</asp:LinkButton> 
+                            <asp:LinkButton ID="nodeTypeEdit" Font-Bold="true" runat="server" OnClick="nodeTypeEdit_Click">Name [and color] of Node Type</asp:LinkButton> 
                         </li>
                 </ItemTemplate>
                 <FooterTemplate>
@@ -126,7 +126,8 @@
             </p>
         </asp:Panel>
         <asp:Panel ID="listNodesScreen" runat="server" Visible="false" CssClass="editscrn">
-            <p>Select a node to edit, or use the arrows to move up or down in relative display order:</p>
+            <p>Select a node to edit, use the arrows to move up or down in relative display order, or use the [Associations] 
+                link at the end of each node title to edit the node's relationships with other nodes in this monad:</p>
             <asp:Repeater ID="nodeTypeTopRepeater" runat="server" OnItemDataBound="nodeTypeTopRepeater_ItemDataBound">
                 <HeaderTemplate>
                     <ul>
@@ -142,11 +143,12 @@
                                         <li>
                                             <span class="order"><asp:LinkButton ID="nodeUp" runat="server" OnClick="nodeUp_Click" ToolTip="Move this node up the list">&#8679;</asp:LinkButton>
                                             <asp:LinkButton ID="nodeDown" runat="server" OnClick="nodeDown_Click" ToolTip="Move this node down the list">&#8681;</asp:LinkButton></span>
-                                            <asp:LinkButton ID="nodeEdit" runat="server" OnClick="nodeEdit_Click">Name [and color] of Node</asp:LinkButton> 
+                                            <asp:LinkButton ID="nodeEdit" Font-Bold="true" runat="server" OnClick="nodeEdit_Click">Name [and color] of Node</asp:LinkButton> 
+                                            <asp:LinkButton ID="nodeRelationsEdit" runat="server" OnClick="nodeRelationsEdit_Click">[3 Associations]</asp:LinkButton>
                                         </li>
                                 </ItemTemplate>
                                 <FooterTemplate>
-                                        <li><asp:LinkButton ID="nodeAdd" runat="server" OnClick="nodeAdd_Click">[Add a New Node of this Type]</asp:LinkButton></li>
+                                        <li><asp:LinkButton ID="nodeAdd" runat="server" OnClick="nodeEdit_Click">[Add a New Node of this Type]</asp:LinkButton></li>
                                     </ul>
                                 </FooterTemplate>
                             </asp:Repeater>
@@ -161,10 +163,71 @@
             </p>
         </asp:Panel>
         <asp:Panel ID="editNodeScreen" runat="server" Visible="false" CssClass="editscrn">
-        </asp:Panel>
-        <asp:Panel ID="fileUploadScreen" runat="server" Visible="false" CssClass="editscrn">
+            <p>Please use the following elements to define this node:</p>
+            <p>
+                <strong><asp:Label ID="nodeTitleLabel" AssociatedControlID="nodeTitle" runat="server" Text="Node Title:"></asp:Label></strong>
+                <asp:TextBox ID="nodeTitle" runat="server" Width="300px"></asp:TextBox> 
+                <asp:RequiredFieldValidator Display="Dynamic" ID="nodeTitleValidator" runat="server" ControlToValidate="nodeTitle" SetFocusOnError="true"><span class="required">* Required</span></asp:RequiredFieldValidator>
+            </p>
+            <p>
+                <strong><asp:Label ID="nodeTextLabel" AssociatedControlID="nodeText" runat="server" Text="Node Text/Content:"></asp:Label></strong>
+                <asp:RequiredFieldValidator Display="Dynamic" ID="nodeTextValidation" runat="server" ControlToValidate="nodeText" SetFocusOnError="true"><span class="required">* Required</span></asp:RequiredFieldValidator><br />
+                <asp:TextBox ID="nodeText" runat="server" TextMode="MultiLine" Width="400px" Height="300px"></asp:TextBox> <br />
+                <em>Please Note: Too much text will be truncated in the final display. <br />
+                Remember to sample view your visualization content to avoid confusing text cutoffs. </em>
+            </p>
+            <p>
+                <strong><asp:Label ID="nodeURLLabel" AssociatedControlID="nodeURL" runat="server" Text="Node Hyperlink:"></asp:Label></strong>
+                <asp:TextBox ID="nodeURL" runat="server"></asp:TextBox>  
+                <asp:Button CausesValidation="false" OnClick="nodeURLSelect_Click" ID="nodeURLSelect" runat="server" Text="Select/Upload Local File..." /><br />
+                <em>This field is optional. Leave it blank, select a local file, or paste/type<br /> in the Internet link you which the node title to point to.</em>
+             </p>
+            <p>
+                <asp:Button ID="saveNodeButton" CausesValidation="true" runat="server" Text="Save the Updated Information" />
+                <asp:HiddenField ID="newNodeTypeReference" runat="server" />
+                or
+                <asp:Button ID="deleteNodeButton" OnClick="deleteNodeButton_Click" CausesValidation="false" runat="server" Text="Delete this Node" />
+                or
+                <asp:Button ID="cancelNodeButton" OnClick="cancelButton_Click" CausesValidation="false" runat="server" Text="Cancel Editing" />
+            </p>
         </asp:Panel>
         <asp:Panel ID="fileSelectScreen" runat="server" Visible="false" CssClass="editscrn">
+            <p>The following is a complete list of the files currently uploaded to be associated with this monad visualization.<br />
+                Use the buttons to preview the file in a new tab/window or to select it to be associated with the working node.
+            </p>
+            <div class="editscrn">
+            <asp:GridView ID="fileList" runat="server" CssClass="filelist" AutoGenerateColumns="false" CellPadding="2" OnRowDataBound="fileList_RowDataBound">
+                <Columns>
+                    <asp:TemplateField ShowHeader="true" HeaderText="File Name" HeaderStyle-Font-Bold="true">
+                        <ItemTemplate>
+                            <asp:HyperLink ID="filePreview" runat="server" Target="_blank">[Preview]</asp:HyperLink>
+                            <asp:Literal ID="filePartialName" runat="server"></asp:Literal>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField ShowHeader="true" HeaderText="Your Options" HeaderStyle-Font-Bold="true">
+                        <ItemTemplate>
+                            <asp:Button ID="selectFile" OnClick="selectFile_Click" runat="server" Text="Select this File" />
+                            <asp:Button ID="deleteFile" OnClick="deleteFile_Click" runat="server" CommandArgument="false" Text="Delete this File" />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <EmptyDataTemplate>
+                    <p style="text-align:center;"><strong>No files currently are in this monad's local file library.</strong></p>
+                </EmptyDataTemplate>
+            </asp:GridView>
+            </div>
+            <p>Alternatively, you can upload a new file(s).<br />
+                After uploading, this screen will refresh with the newly posted files for your selection.<br />
+                <em>Total size of all files together must be under 100MB.</em>
+            </p>
+            <p>
+                <strong>Step 1)</strong> <asp:FileUpload ID="fileUploader" runat="server" Font-Italic="true" AllowMultiple="true" /> <br /><br />
+                <strong>Step 2)</strong> <asp:Button ID="fileUploadSubmit" OnClick="fileUploadSubmit_Click" runat="server" Text="Upload Selected File" />
+            </p>
+            <p>- or - </p>
+            <p>
+                <asp:Button ID="cancelFileSelectButton" OnClick="cancelButton_Click" CausesValidation="false" runat="server" Text="Cancel Local File Selection" />
+            </p>
         </asp:Panel>
         <asp:Panel ID="linkSelectScreen" runat="server" Visible="false" CssClass="editscrn">
         </asp:Panel>

@@ -107,6 +107,18 @@ public partial class EditMonadPage : System.Web.UI.Page
             landingScreen.Visible = true;
             listNodesScreen.Visible = false;
         }
+        else if (editNodeScreen.Visible)
+        {
+            errorText.Text = "<p class=\"confirm\">Node Adding/Editing Cancelled</p>";
+            listNodesScreen.Visible = true;
+            editNodeScreen.Visible = false;
+        }
+        else if (fileSelectScreen.Visible)
+        {
+            errorText.Text = "<p class=\"confirm\">Local File Selection Cancelled</p>";
+            editNodeScreen.Visible = true;
+            fileSelectScreen.Visible = false;
+        }
     }
 
     #region Edit Basic Information  
@@ -560,6 +572,9 @@ public partial class EditMonadPage : System.Web.UI.Page
         }
     }
 
+    // Have a global member tracking the current node type being bound
+    private int workingNodeType = 0;
+
     /// <summary>
     /// For when our sublist databinds
     /// </summary>
@@ -577,6 +592,13 @@ public partial class EditMonadPage : System.Web.UI.Page
             // Populate the up and down arrows with the correct information (node ID and type ID)
             ((LinkButton)e.Item.FindControl("nodeUp")).CommandArgument = node.NodeID.ToString() + ":" + node.NodeTypeID.ToString();
             ((LinkButton)e.Item.FindControl("nodeDown")).CommandArgument = node.NodeID.ToString() + ":" + node.NodeTypeID.ToString();
+            // Store the node type
+            workingNodeType = node.NodeTypeID;
+        }
+        else if (e.Item.ItemType == ListItemType.Footer)
+        {
+            // Make reference to the nodetype so we know where to place the new node
+            ((LinkButton)e.Item.FindControl("nodeAdd")).CommandArgument = workingNodeType.ToString();
         }
     }
 
@@ -633,17 +655,270 @@ public partial class EditMonadPage : System.Web.UI.Page
             context.SaveChanges();
         }
         // Now rebind the list
-        editNodesLink_Click(sender, e); 
+        editNodesLink_Click(sender, e);
+    }
+
+    /// <summary>
+    /// For when we are editing or adding a node
+    /// </summary>
+    protected void nodeEdit_Click(object sender, EventArgs e)
+    {
+        // Clear any previous error
+        errorText.Text = null;
+        // Switch screens
+        listNodesScreen.Visible = false;
+        editNodeScreen.Visible = true;
+        // Populate with the information from what's in the database
+        using (MonadModel context = new MonadModel())
+        {
+            // Is this a new node addition?
+            if (((LinkButton)sender).ID == "nodeAdd")
+            {
+                deleteNodeButton.Enabled = false;
+                // Populate for a new record
+                nodeTitle.Text = null;
+                nodeText.Text = null;
+                nodeURL.Text = null;
+                // And store the blank ID of this node in the viewstate
+                ViewState["EditingNode"] = 0;
+                // And store the node type reference for later in our hidden thingydohicky
+                newNodeTypeReference.Value = ((LinkButton)sender).CommandArgument;
+            }
+            else
+            {
+                deleteNodeButton.Enabled = true;
+                deleteNodeButton.CommandArgument = "false";
+                // This is editing an existing node type
+                int id = int.Parse(((LinkButton)sender).CommandArgument);
+                Node n = context.Nodes.First(x => x.NodeID == id);
+                nodeTitle.Text = n.Title;
+                nodeText.Text = n.Text;
+                nodeURL.Text = n.URL;
+                // And store the ID of this nodetype in the viewstate
+                ViewState["EditingNode"] = n.NodeID;
+            }
+        }
+    }
+
+    /// <summary>
+    /// For when we want to delete a node
+    /// </summary>
+    protected void deleteNodeButton_Click(object sender, EventArgs e)
+    {
+        // Clear previous errors
+        errorText.Text = null;
+        if (deleteNodeButton.CommandArgument == "false")
+        {
+            // Update the error text for a confirmation and set the delete flag
+            // to process the next time the user clicks
+            deleteNodeButton.CommandArgument = "true";
+            errorText.Text = "<p class=\"error\">Are you sure you want to delete this node?<br/>Confirm by selecting the 'Delete' button once more.</p>";
+        }
+        else if (deleteNodeButton.CommandArgument == "true")
+        {
+            // This is a confirmed delete...
+            // Use a context to loop all referenced records and delete
+            int id = (int)ViewState["EditingNode"];
+            using (MonadModel context = new MonadModel())
+            {
+                try
+                {
+                    // Remove the links
+                    Node n = context.Nodes.First(x => x.NodeID == id);
+                    foreach (NodeLink nl in n.NodeLinks1.ToArray()) context.NodeLinks.Remove(nl);
+                    foreach (NodeLink nl in n.NodeLinks2.ToArray()) context.NodeLinks.Remove(nl);
+                    // Remove the node
+                    context.Nodes.Remove(n);
+                    // And save the changes
+                    context.SaveChanges();
+                    // Go back to the main node listing
+                    errorText.Text = "<p class=\"confirm\">Node Deleted</p>";
+                    listNodesScreen.Visible = true;
+                    editNodeScreen.Visible = false;
+                    // Rebind the list
+                    nodeTypeTopRepeater.DataSource = context.Monads.First(m => m.MonadID == MyMonad.MonadID).
+                                      NodeTypes.OrderBy(nt => nt.Sequence).
+                                      ToArray();
+                    nodeTypeTopRepeater.DataBind();
+                }
+                catch (Exception ex)
+                {
+                    // Get to the last inner exception and display that
+                    while (ex.InnerException != null) ex = ex.InnerException;
+                    errorText.Text = "<p class=\"error\">An error occured: " + ex.Message + "</p>";
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// For When the user wants to select our upload a local file
+    /// </summary>
+    protected void nodeURLSelect_Click(object sender, EventArgs e)
+    {
+        // Clear any previous error
+        errorText.Text = null;
+        // Switch screens
+        fileSelectScreen.Visible = true;
+        editNodeScreen.Visible = false;
+        // And bind the current list from the working monad directory
+        if (System.IO.Directory.Exists(Server.MapPath("~/library/" + MyMonad.MonadID)))
+        {
+            fileList.DataSource = System.IO.Directory.EnumerateFiles(Server.MapPath("~/library/" + MyMonad.MonadID));
+            fileList.DataBind();
+        }
+        else
+        {
+            // Trigger the no records message
+            fileList.DataSource = new Array[] { };
+            fileList.DataBind();
+        }
+
+    }
+
+    /// <summary>
+    /// A user want to upload a file
+    /// </summary>
+    protected void fileUploadSubmit_Click(object sender, EventArgs e)
+    {
+        // Clear any previous error
+        errorText.Text = string.Empty;
+        // Is there are file?
+        if (!fileUploader.HasFiles)
+        {
+            errorText.Text = "<p class=\"error\">No file(s) were selected for upload.</p>";
+        }
+        else
+        {
+            // Specify the path to save the uploaded file(s) to.
+            string savePath = Server.MapPath("~/library/" + MyMonad.MonadID + "/");
+            // Create this directory if necessary
+            if (!System.IO.Directory.Exists(savePath)) System.IO.Directory.CreateDirectory(savePath);
+            // The follow code was adapted from 
+            // https://msdn.microsoft.com/en-us/library/system.web.ui.webcontrols.fileupload.hasfile(v=vs.110).aspx
+            foreach (HttpPostedFile file in fileUploader.PostedFiles)
+            {
+                // Get the name of the file to upload.
+                string fileName = file.FileName;
+                // Create the path and file name to check for duplicates.
+                string pathToCheck = savePath + "\\" + fileName;
+                // Create a temporary file name to use for checking duplicates.
+                string tempfileName = "";
+                // Check to see if a file already exists with the
+                // same name as the file to upload.        
+                if (System.IO.File.Exists(pathToCheck))
+                {
+                    int counter = 2;
+                    while (System.IO.File.Exists(pathToCheck))
+                    {
+                        // if a file with this name already exists,
+                        // prefix the filename with a number.
+                        tempfileName = "(" + counter.ToString() + ")" + fileName;
+                        // Update the path to check
+                        pathToCheck = savePath + tempfileName;
+                        // Increment the counter
+                        counter++;
+                    }
+                    // Update the working filename
+                    fileName = tempfileName;
+                    // Notify the user that the file name was changed.
+                    errorText.Text = "<p class=\"confirm\">Files Uploaded.<br/>Please be aware some were numerically prefixed due to pre-existing files with the same name.</p>";
+                }
+                else
+                {
+                    // Notify the user that the file was saved successfully.
+                    errorText.Text = "<p class=\"confirm\">Files Uploaded Successfully.</p>";
+                }
+                // Call the SaveAs method to save the uploaded
+                // file to the specified directory.
+                file.SaveAs(savePath + fileName);
+            }
+            // Rebind the grid!
+            if (System.IO.Directory.Exists(Server.MapPath("~/library/" + MyMonad.MonadID)))
+            {
+                fileList.DataSource = System.IO.Directory.EnumerateFiles(Server.MapPath("~/library/" + MyMonad.MonadID));
+                fileList.DataBind();
+            }
+            else
+            {
+                // Trigger the no records message
+                fileList.DataSource = new Array[] { };
+                fileList.DataBind();
+            }
+        }
+    }
+
+    /// <summary>
+    /// For when the file listing populates on local monad files
+    /// </summary>
+    protected void fileList_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // Grab the incoming file name
+            string file = (string)e.Row.DataItem;
+            // Set the preview
+            ((HyperLink)e.Row.FindControl("filePreview")).NavigateUrl = "/library/" + MyMonad.MonadID + "/" + file.Split('\\').Last();
+            ((Literal)e.Row.FindControl("filePartialName")).Text = file.Split('\\').Last();
+        }
+    }
+
+    /// <summary>
+    /// For when the right file is found and selected
+    /// </summary>
+    protected void selectFile_Click(object sender, EventArgs e)
+    {
+        // Clear and errors
+        errorText.Text = null;
+        // Snag the URL from the preview link
+        nodeURL.Text = ((HyperLink)((Button)sender).NamingContainer.FindControl("filePreview")).NavigateUrl;
+        // Change screens
+        editNodeScreen.Visible = true;
+        fileSelectScreen.Visible = false;
+        // Notify the user that the file was selected.
+        errorText.Text = "<p class=\"confirm\">Local File Selected for Node Link.</p>";
+    }
+
+    /// <summary>
+    /// For when a file is marked to be deleted from the directory
+    /// </summary>
+    protected void deleteFile_Click(object sender, EventArgs e)
+    {
+        // Clear previous errors
+        errorText.Text = null;
+        if (((Button)sender).CommandArgument == "false")
+        {
+            // Update the error text for a confirmation and set the delete flag
+            // to process the next time the user clicks it
+            ((Button)sender).CommandArgument = "true";
+            errorText.Text = "<p class=\"error\">Are you sure you want to delete this file?<br/>Confirm by selecting the 'Delete' button for this file once more.</p>";
+        }
+        else if (((Button)sender).CommandArgument == "true")
+        {
+            // This is a confirmed delete...
+            // Use the preview and mappath to delete it
+            string fileToDelete = Server.MapPath(((HyperLink)((Button)sender).NamingContainer.FindControl("filePreview")).NavigateUrl);
+            if (System.IO.File.Exists(fileToDelete)) System.IO.File.Delete(fileToDelete);
+            // Notify the user that the file was delete successfully.
+            errorText.Text = "<p class=\"confirm\">" + fileToDelete.Split('\\').Last() + " Deleted Successfully.</p>";
+            // Rebind the grid!
+            if (System.IO.Directory.Exists(Server.MapPath("~/library/" + MyMonad.MonadID)))
+            {
+                fileList.DataSource = System.IO.Directory.EnumerateFiles(Server.MapPath("~/library/" + MyMonad.MonadID));
+                fileList.DataBind();
+            }
+            else
+            {
+                // Trigger the no records message
+                fileList.DataSource = new Array[] { };
+                fileList.DataBind();
+            }
+        }
     }
 
     #endregion
 
-    protected void nodeEdit_Click(object sender, EventArgs e)
-    {
-    
-    }
-
-    protected void nodeAdd_Click(object sender, EventArgs e)
+    protected void nodeRelationsEdit_Click(object sender, EventArgs e)
     {
 
     }
