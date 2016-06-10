@@ -101,6 +101,12 @@ public partial class EditMonadPage : System.Web.UI.Page
             editNodeTypeScreen.Visible = true;
             slugSelectionScreen.Visible = false;
         }
+        else if (listNodesScreen.Visible)
+        {
+            errorText.Text = null;
+            landingScreen.Visible = true;
+            listNodesScreen.Visible = false;
+        }
     }
 
     #region Edit Basic Information  
@@ -121,6 +127,61 @@ public partial class EditMonadPage : System.Web.UI.Page
         urlSegment.Text = MyMonad.URLSegment;
         adminPWD.Text = MyMonad.AdminPWD;
         showNodeTypesFlag.Checked = MyMonad.ShowNodeTypes;
+        // Set up the flag for deleting
+        deleteMonad.CommandArgument = "false";
+    }
+
+    // For when the user wants to delete the monad
+    protected void deleteMonad_Click(object sender, EventArgs e)
+    {
+        // Clear previous errors
+        errorText.Text = null;
+        if (deleteMonad.CommandArgument == "false")
+        {
+            // Update the error text for a confirmation and set the delete flag
+            // to process the next time the user clicks
+            deleteMonad.CommandArgument = "true";
+            errorText.Text = "<p class=\"error\">Are you sure you want to delete this monad?<br/>Confirm by selecting the 'Delete' button once more.<br/>This will delete all the underlying data and return you to the homepage!!</p>";
+        }
+        else if (deleteMonad.CommandArgument == "true")
+        {
+            // This is a confirmed delete...
+            // Use a context to loop all referenced records and delete
+            using (MonadModel context = new MonadModel())
+            {
+                try
+                {
+                    Monad monad = context.Monads.First(m => m.MonadID == MyMonad.MonadID);
+                    // Loop the node types
+                    foreach (NodeType nt in monad.NodeTypes.ToArray())
+                    {
+                        // Loop the nodes
+                        foreach (Node n in nt.Nodes.ToArray())
+                        {
+                            // Remove the links
+                            foreach (NodeLink nl in n.NodeLinks1.ToArray()) context.NodeLinks.Remove(nl);
+                            foreach (NodeLink nl in n.NodeLinks2.ToArray()) context.NodeLinks.Remove(nl);
+                            // Remove the node
+                            context.Nodes.Remove(n);
+                        }
+                        // Remove the node type
+                        context.NodeTypes.Remove(nt);
+                    }
+                    // Remove the monad itself
+                    context.Monads.Remove(monad);
+                    // And save the changes
+                    context.SaveChanges();
+                    // Return to the homepage
+                    Response.Redirect("/default.aspx?monad_deleted=true");
+                }
+                catch (Exception ex)
+                {
+                    // Get to the last inner exception and display that
+                    while (ex.InnerException != null) ex = ex.InnerException;
+                    errorText.Text = "<p class=\"error\">An error occured: " + ex.Message + "</p>";
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -273,6 +334,7 @@ public partial class EditMonadPage : System.Web.UI.Page
             // Is this a new node type addition?
             if (((LinkButton)sender).ID == "nodeTypeAdd")
             {
+                deleteNodeTypeButton.Enabled = false;
                 // Populate for a new record
                 nodeTypeName.Text = null;
                 nodeTypePluralName.Text = null;
@@ -285,6 +347,8 @@ public partial class EditMonadPage : System.Web.UI.Page
             }
             else
             {
+                deleteNodeTypeButton.Enabled = true;
+                deleteNodeTypeButton.CommandArgument = "false";
                 // This is editing an existing node type
                 int id = int.Parse(((LinkButton)sender).CommandArgument);
                 NodeType nt = context.NodeTypes.First(t => t.NodeTypeID == id);
@@ -401,5 +465,186 @@ public partial class EditMonadPage : System.Web.UI.Page
         }
     }
 
+    /// <summary>
+    /// For when the user wants to delete a node type
+    /// </summary>
+    protected void deleteNodeTypeButton_Click(object sender, EventArgs e)
+    {
+        // Clear previous errors
+        errorText.Text = null;
+        if (deleteNodeTypeButton.CommandArgument == "false")
+        {
+            // Update the error text for a confirmation and set the delete flag
+            // to process the next time the user clicks
+            deleteNodeTypeButton.CommandArgument = "true";
+            errorText.Text = "<p class=\"error\">Are you sure you want to delete this node type?<br/>Confirm by selecting the 'Delete' button once more.<br/>This will delete all nodes underneath it!!</p>";
+        }
+        else if (deleteNodeTypeButton.CommandArgument == "true")
+        {
+            // This is a confirmed delete...
+            // Use a context to loop all referenced records and delete
+            int id = (int)ViewState["EditingNodeType"];
+            using (MonadModel context = new MonadModel())
+            {
+                try
+                {
+                    foreach (Node n in context.NodeTypes.First(nt => nt.NodeTypeID == id).Nodes.ToArray())
+                    {
+                        // Remove the links
+                        foreach (NodeLink nl in n.NodeLinks1.ToArray()) context.NodeLinks.Remove(nl);
+                        foreach (NodeLink nl in n.NodeLinks2.ToArray()) context.NodeLinks.Remove(nl);
+                        // Remove the node
+                        context.Nodes.Remove(n);
+                    }
+                    // Remove the node type
+                    context.NodeTypes.Remove(context.NodeTypes.First(nt => nt.NodeTypeID == id));
+                    // And save the changes
+                    context.SaveChanges();
+                    // Go back to the main node listing
+                    errorText.Text = "<p class=\"confirm\">Node Type Deleted</p>";
+                    listNodeTypesScreen.Visible = true;
+                    editNodeTypeScreen.Visible = false;
+                    // Rebind the list
+                    nodeTypeList.DataSource = context.Monads.First(m => m.MonadID == MyMonad.MonadID).
+                                          NodeTypes.OrderBy(t => t.Sequence).
+                                          ToArray();
+                    nodeTypeList.DataBind();
+                }
+                catch (Exception ex)
+                {
+                    // Get to the last inner exception and display that
+                    while (ex.InnerException != null) ex = ex.InnerException;
+                    errorText.Text = "<p class=\"error\">An error occured: " + ex.Message + "</p>";
+                }
+            }
+        }
+    }
+
     #endregion
+
+    #region Editing Individual Nodes
+
+    /// <summary>
+    /// For when the user wants to list out the nodes for editing
+    /// </summary>
+    protected void editNodesLink_Click(object sender, EventArgs e)
+    {
+        // Clear all previous error text
+        errorText.Text = null;
+        // Switch screens
+        landingScreen.Visible = false;
+        listNodesScreen.Visible = true;
+        // Initialize the top level repeater with the current list of node types
+        using (MonadModel context = new MonadModel())
+        {
+            nodeTypeTopRepeater.DataSource = context.Monads.First(m => m.MonadID == MyMonad.MonadID).
+                                      NodeTypes.OrderBy(nt => nt.Sequence).
+                                      ToArray();
+            nodeTypeTopRepeater.DataBind();
+        }
+    }
+
+    /// <summary>
+    /// For when a top level repeater for node types binds a data item
+    /// </summary>
+    protected void nodeTypeTopRepeater_ItemDataBound(object sender, RepeaterItemEventArgs e)
+    {
+        // Check to ensure this is the correct item type
+        if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
+        {
+            NodeType nodeType = (NodeType)e.Item.DataItem;
+            ((Literal)e.Item.FindControl("nodeTypeName")).Text = "<span style=\"color:#" + nodeType.Color + ";\">" + nodeType.PluralName + "</span>";
+            // Find the subrepeater for the nodes and bind it
+            ((Repeater)e.Item.FindControl("nodeList")).DataSource = nodeType.Nodes.OrderBy(n => n.Sequence).ToArray();
+            ((Repeater)e.Item.FindControl("nodeList")).DataBind();
+        }
+    }
+
+    /// <summary>
+    /// For when our sublist databinds
+    /// </summary>
+    protected void nodeList_ItemDataBound(object sender, RepeaterItemEventArgs e)
+    {
+        if (e.Item.ItemType == ListItemType.AlternatingItem || e.Item.ItemType == ListItemType.Item)
+        {
+            // Cast the incoming dataitem
+            Node node = (Node)e.Item.DataItem;
+            // Populate the main link button information for this node
+            LinkButton lb = (LinkButton)e.Item.FindControl("nodeEdit");
+            lb.ForeColor = System.Drawing.ColorTranslator.FromHtml("#" + node.NodeType.Color);
+            lb.Text = node.Title;
+            lb.CommandArgument = node.NodeID.ToString();
+            // Populate the up and down arrows with the correct information (node ID and type ID)
+            ((LinkButton)e.Item.FindControl("nodeUp")).CommandArgument = node.NodeID.ToString() + ":" + node.NodeTypeID.ToString();
+            ((LinkButton)e.Item.FindControl("nodeDown")).CommandArgument = node.NodeID.ToString() + ":" + node.NodeTypeID.ToString();
+        }
+    }
+
+    /// <summary>
+    ///  For when a node needs to move up...
+    /// </summary>
+    protected void nodeUp_Click(object sender, EventArgs e)
+    {
+        using (MonadModel context = new MonadModel())
+        {
+            // Pull the full list in decending order
+            int nodeID = int.Parse(((LinkButton)sender).CommandArgument.Split(':').First());
+            int nodeTypeID = int.Parse(((LinkButton)sender).CommandArgument.Split(':').Last());
+            Node[] nodes = context.Nodes.Where(n => n.NodeTypeID == nodeTypeID).OrderBy(n => n.Sequence).ToArray();
+            // Loop through and process accordingly and skipping the first record (which can't move up)
+            for (int x = (nodes.Length - 1); x > 0; x--)
+            {
+                if (nodes[x].NodeID == nodeID)
+                {
+                    nodes[x].Sequence -= 1;
+                    nodes[x - 1].Sequence += 1;
+                    x = 1;
+                }
+            }
+            // Save the changes
+            context.SaveChanges();
+        }
+        // Now rebind the list
+        editNodesLink_Click(sender, e);
+    }
+
+    /// <summary>
+    /// And when a node needs to move down...
+    /// </summary>
+    protected void nodeDown_Click(object sender, EventArgs e)
+    {
+        using (MonadModel context = new MonadModel())
+        {
+            // Pull the full list in decending order
+            int nodeID = int.Parse(((LinkButton)sender).CommandArgument.Split(':').First());
+            int nodeTypeID = int.Parse(((LinkButton)sender).CommandArgument.Split(':').Last());
+            Node[] nodes = context.Nodes.Where(n => n.NodeTypeID == nodeTypeID).OrderBy(n => n.Sequence).ToArray();
+            // Loop through and process accordingly and skipping the first record (which can't move up)
+            for (int x = 0; x < (nodes.Length - 1); x++)
+            {
+                if (nodes[x].NodeID == nodeID)
+                {
+                    nodes[x].Sequence += 1;
+                    nodes[x + 1].Sequence -= 1;
+                    x = nodes.Length;
+                }
+            }
+            // Save the changes
+            context.SaveChanges();
+        }
+        // Now rebind the list
+        editNodesLink_Click(sender, e); 
+    }
+
+    #endregion
+
+    protected void nodeEdit_Click(object sender, EventArgs e)
+    {
+    
+    }
+
+    protected void nodeAdd_Click(object sender, EventArgs e)
+    {
+
+    }
 }

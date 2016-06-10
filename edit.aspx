@@ -21,7 +21,7 @@
             <ul>
                 <li><asp:LinkButton ID="editBasicLink" OnClick="editBasicLink_Click" runat="server">Edit Basic Monad Information</asp:LinkButton></li>
                 <li><asp:LinkButton ID="editNodeTypesLink" OnClick="editNodeTypesLink_Click" runat="server">Edit the Node Types</asp:LinkButton></li>
-                <li><asp:LinkButton ID="editNodesLink" runat="server">Edit the Individual Nodes</asp:LinkButton></li>
+                <li><asp:LinkButton ID="editNodesLink" OnClick="editNodesLink_Click" runat="server">Edit the Individual Nodes</asp:LinkButton></li>
             </ul>
         </asp:Panel>
         <asp:Panel ID="editBasicScreen" runat="server" Visible="false" CssClass="editscrn">
@@ -52,6 +52,8 @@
             </p>
             <p>
                 <asp:Button ID="saveBasicInfoButton" CausesValidation="true" OnClick="saveBasicInfoButton_Click" runat="server" Text="Save the Updated Information" />
+                or
+                <asp:Button ID="deleteMonad" CausesValidation="false" OnClick="deleteMonad_Click" runat="server" Text="Delete this Monad" />
                 or
                 <asp:Button ID="cancelBasicInfoButton" CausesValidation="false" runat="server" OnClick="cancelButton_Click" Text="Cancel Editing" />
             </p>
@@ -105,6 +107,8 @@
             <p>
                 <asp:Button ID="saveNodeTypeButton" CausesValidation="true" OnClick="saveNodeTypeButton_Click" runat="server" Text="Save the Updated Information" />
                 or
+                <asp:Button ID="deleteNodeTypeButton" CausesValidation="false" OnClick="deleteNodeTypeButton_Click" runat="server" Text="Delete this Node Type" />
+                or
                 <asp:Button ID="cancelNodeTypeButton" CausesValidation="false" runat="server" OnClick="cancelButton_Click" Text="Cancel Editing" />
             </p>
         </asp:Panel>
@@ -122,6 +126,39 @@
             </p>
         </asp:Panel>
         <asp:Panel ID="listNodesScreen" runat="server" Visible="false" CssClass="editscrn">
+            <p>Select a node to edit, or use the arrows to move up or down in relative display order:</p>
+            <asp:Repeater ID="nodeTypeTopRepeater" runat="server" OnItemDataBound="nodeTypeTopRepeater_ItemDataBound">
+                <HeaderTemplate>
+                    <ul>
+                </HeaderTemplate>
+                <ItemTemplate>
+                        <li>
+                            <p><strong><asp:Literal runat="server" ID="nodeTypeName" Mode="PassThrough"></asp:Literal></strong></p>
+                            <asp:Repeater ID="nodeList" runat="server" OnItemDataBound="nodeList_ItemDataBound">
+                                <HeaderTemplate>
+                                    <ul>
+                                </HeaderTemplate>
+                                <ItemTemplate> 
+                                        <li>
+                                            <span class="order"><asp:LinkButton ID="nodeUp" runat="server" OnClick="nodeUp_Click" ToolTip="Move this node up the list">&#8679;</asp:LinkButton>
+                                            <asp:LinkButton ID="nodeDown" runat="server" OnClick="nodeDown_Click" ToolTip="Move this node down the list">&#8681;</asp:LinkButton></span>
+                                            <asp:LinkButton ID="nodeEdit" runat="server" OnClick="nodeEdit_Click">Name [and color] of Node</asp:LinkButton> 
+                                        </li>
+                                </ItemTemplate>
+                                <FooterTemplate>
+                                        <li><asp:LinkButton ID="nodeAdd" runat="server" OnClick="nodeAdd_Click">[Add a New Node of this Type]</asp:LinkButton></li>
+                                    </ul>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </li>
+                </ItemTemplate>
+                <FooterTemplate>
+                    </ul>
+                </FooterTemplate>
+            </asp:Repeater>
+            <p>
+                <asp:Button ID="cancelNodeListButton" CausesValidation="false" runat="server" OnClick="cancelButton_Click" Text="Return to the Main Editing Options" />
+            </p>
         </asp:Panel>
         <asp:Panel ID="editNodeScreen" runat="server" Visible="false" CssClass="editscrn">
         </asp:Panel>
