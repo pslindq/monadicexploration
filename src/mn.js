@@ -15,7 +15,7 @@ function MonadicNomad() {
 
 	this.valmin = {};
 	this.valmax = {};
-	this.valsum = {};
+	this.valsum = {}; 
 
 	this.resizeTimeout = null;
 	this.peekTimeout = null;

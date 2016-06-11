@@ -22,7 +22,7 @@ public partial class CreateMonadPage : System.Web.UI.Page
 
     protected void submitButton_Click(object sender, EventArgs e)
     {
-        // Reset any error
+        // Reset any error 
         errorText.Text = null;
         // Create the new record
         Monad newMonad = new Monad();

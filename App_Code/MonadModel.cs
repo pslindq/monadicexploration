@@ -10,7 +10,7 @@ public partial class MonadModel : DbContext
     {
     }
 
-    public virtual DbSet<Monad> Monads { get; set; }
+    public virtual DbSet<Monad> Monads { get; set; } 
     public virtual DbSet<NodeLink> NodeLinks { get; set; }
     public virtual DbSet<Node> Nodes { get; set; }
     public virtual DbSet<NodeType> NodeTypes { get; set; }

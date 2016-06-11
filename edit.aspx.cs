@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -118,6 +119,12 @@ public partial class EditMonadPage : System.Web.UI.Page
             errorText.Text = "<p class=\"confirm\">Local File Selection Cancelled</p>";
             editNodeScreen.Visible = true;
             fileSelectScreen.Visible = false;
+        }
+        else if (linkSelectScreen.Visible)
+        {
+            errorText.Text = "<p class=\"confirm\">Node Linking/Associations Cancelled</p>";
+            listNodesScreen.Visible = true;
+            linkSelectScreen.Visible = false;
         }
     }
 
@@ -441,7 +448,14 @@ public partial class EditMonadPage : System.Web.UI.Page
                 context.NodeTypes.Add(nt);
                 nt.MonadID = MyMonad.MonadID;
                 // Set the sequence to be last
-                nt.Sequence = context.Monads.First(m => m.MonadID == MyMonad.MonadID).NodeTypes.Count + 1;
+                try
+                {
+                    nt.Sequence = context.Monads.First(m => m.MonadID == MyMonad.MonadID).NodeTypes.Count + 1;
+                }
+                catch (Exception)
+                {
+                    nt.Sequence = 1;
+                }
             }   
             else
             {
@@ -567,6 +581,7 @@ public partial class EditMonadPage : System.Web.UI.Page
             NodeType nodeType = (NodeType)e.Item.DataItem;
             ((Literal)e.Item.FindControl("nodeTypeName")).Text = "<span style=\"color:#" + nodeType.Color + ";\">" + nodeType.PluralName + "</span>";
             // Find the subrepeater for the nodes and bind it
+            workingNodeType = nodeType.NodeTypeID;
             ((Repeater)e.Item.FindControl("nodeList")).DataSource = nodeType.Nodes.OrderBy(n => n.Sequence).ToArray();
             ((Repeater)e.Item.FindControl("nodeList")).DataBind();
         }
@@ -592,8 +607,9 @@ public partial class EditMonadPage : System.Web.UI.Page
             // Populate the up and down arrows with the correct information (node ID and type ID)
             ((LinkButton)e.Item.FindControl("nodeUp")).CommandArgument = node.NodeID.ToString() + ":" + node.NodeTypeID.ToString();
             ((LinkButton)e.Item.FindControl("nodeDown")).CommandArgument = node.NodeID.ToString() + ":" + node.NodeTypeID.ToString();
-            // Store the node type
-            workingNodeType = node.NodeTypeID;
+            // Set the number of association link
+            ((LinkButton)e.Item.FindControl("nodeRelationsEdit")).CommandArgument = node.NodeID.ToString();
+            ((LinkButton)e.Item.FindControl("nodeRelationsEdit")).Text = "[" + (node.NodeLinks1.Count + node.NodeLinks2.Count).ToString() +" Association(s)]";
         }
         else if (e.Item.ItemType == ListItemType.Footer)
         {
@@ -916,10 +932,210 @@ public partial class EditMonadPage : System.Web.UI.Page
         }
     }
 
-    #endregion
+     private Node linkingToNode { get {
+            return (Node)ViewState["linkingNode"];
+        } set { ViewState["linkingNode"] = value; } }
 
+    /// <summary>
+    /// When the user wants to edit the node associations
+    /// </summary>
     protected void nodeRelationsEdit_Click(object sender, EventArgs e)
     {
-
+        // Clear any previous error
+        errorText.Text = null;
+        // Switch the screens
+        linkSelectScreen.Visible = true;
+        listNodesScreen.Visible = false;
+        // Move to a context for database connectivity
+        using (MonadModel context = new MonadModel())
+        {
+            // Pull the node
+            int id = int.Parse(((LinkButton)sender).CommandArgument);
+            linkingToNode = context.Nodes.First(n => n.NodeID == id);
+            // Set the name on screen
+            associateToNodeName.Text = linkingToNode.Title;
+            nodeTypeLinkingRepeater.DataSource = context.Monads.First(m => m.MonadID == MyMonad.MonadID).
+                                      NodeTypes.OrderBy(nt => nt.Sequence).
+                                      ToArray();
+            nodeTypeLinkingRepeater.DataBind();
+        }
     }
+
+    /// <summary>
+    ///  When the repeater for the linking node types data binds
+    /// </summary>
+    protected void nodeTypeLinkingRepeater_ItemDataBound(object sender, RepeaterItemEventArgs e)
+    {
+        // Check to ensure this is the correct item type
+        if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
+        {
+            NodeType nodeType = (NodeType)e.Item.DataItem;
+            ((Literal)e.Item.FindControl("nodeTypeName")).Text = "<span style=\"color:#" + nodeType.Color + ";\">" + nodeType.PluralName + "</span>";
+            // Find the subrepeater for the nodes and bind it
+            ((Repeater)e.Item.FindControl("nodeListLinking")).DataSource = nodeType.Nodes.Where(n => n.NodeID != linkingToNode.NodeID).OrderBy(n => n.Sequence).ToArray();
+            ((Repeater)e.Item.FindControl("nodeListLinking")).DataBind();
+        }
+    }
+
+    /// <summary>
+    /// when the inner repeater for linking binds data
+    /// </summary>
+    protected void nodeListLinking_ItemDataBound(object sender, RepeaterItemEventArgs e)
+    {
+        if (e.Item.ItemType == ListItemType.AlternatingItem || e.Item.ItemType == ListItemType.Item)
+        {
+            // Cast the incoming dataitem
+            Node node = (Node)e.Item.DataItem;
+            // Populate the main checkbox information for this node
+            CheckBox cb = (CheckBox)e.Item.FindControl("linkNodeFlag");
+            cb.ForeColor = System.Drawing.ColorTranslator.FromHtml("#" + node.NodeType.Color);
+            cb.Text = node.Title;
+            // Set the hidden value to the hidden field
+            ((HiddenField)e.Item.FindControl("nodeID")).Value = node.NodeID.ToString();
+            // Now handle special cases for existing links
+            if (linkingToNode.NodeLinks1.Where(nl => nl.NodeID2 == node.NodeID).Count() > 0)
+            {
+                // Precheck the box
+                cb.Checked = true;
+                // Make a note of the existing link ID
+                ((HiddenField)e.Item.FindControl("linkID")).Value = linkingToNode.NodeLinks1.First(nl => nl.NodeID2 == node.NodeID).NodeLinkID.ToString();
+            }
+            if (linkingToNode.NodeLinks2.Where(nl => nl.NodeID1 == node.NodeID).Count() > 0)
+            {
+                // Precheck the box
+                cb.Checked = true;
+                // Make a note of the existing link ID
+                ((HiddenField)e.Item.FindControl("linkID")).Value = linkingToNode.NodeLinks2.First(nl => nl.NodeID1 == node.NodeID).NodeLinkID.ToString();
+            }
+
+        }
+    }
+
+    /// <summary>
+    /// When the user wants to save the links
+    /// </summary>
+    protected void saveNodeLinkingButton_Click(object sender, EventArgs e)
+    {
+        // Clear any previous error
+        errorText.Text = null;
+        // Start our DB context
+        using (MonadModel context = new MonadModel())
+        {
+            try
+            {
+                // Loop through the repeater elements and process accordingly
+                foreach (RepeaterItem i in nodeTypeLinkingRepeater.Items)
+                {
+                    if (i.ItemType == ListItemType.AlternatingItem || i.ItemType == ListItemType.Item)
+                    {
+                        // Loop the inner repeater
+                        foreach (RepeaterItem j in ((Repeater)i.FindControl("nodeListLinking")).Items)
+                        {
+                            if (j.ItemType == ListItemType.AlternatingItem || j.ItemType == ListItemType.Item)
+                            {
+                                // Is the checkbox checked?
+                                if (((CheckBox)j.FindControl("linkNodeFlag")).Checked && !IsNumeric(((HiddenField)j.FindControl("linkID")).Value))
+                                {
+                                    // We need to create a new link
+                                    NodeLink nl = new NodeLink();
+                                    nl.NodeID1 = linkingToNode.NodeID;
+                                    nl.NodeID2 = int.Parse(((HiddenField)j.FindControl("nodeID")).Value);
+                                    context.NodeLinks.Add(nl);
+                                }
+                                else if (!((CheckBox)j.FindControl("linkNodeFlag")).Checked && IsNumeric(((HiddenField)j.FindControl("linkID")).Value))
+                                {
+                                    // We need to remove a link
+                                    int id = int.Parse(((HiddenField)j.FindControl("linkID")).Value);
+                                    NodeLink nl = context.NodeLinks.First(l => l.NodeLinkID == id);
+                                    context.NodeLinks.Remove(nl);
+                                }
+                                // Save all our changes
+                                context.SaveChanges();
+                            }
+                        }
+                    }
+                }
+                // Return to the list and rebind the repeater
+                linkSelectScreen.Visible = false;
+                listNodesScreen.Visible = true;
+                editNodesLink_Click(sender, e);
+                errorText.Text = "<p class=\"confirm\">Links/Associations Saved.</p>";
+            }
+            catch (Exception ex)
+            {
+                // Get to the last inner exception and display that
+                while (ex.InnerException != null) ex = ex.InnerException;
+                errorText.Text = "<p class=\"error\">An error occured: " + ex.Message + "</p>";
+            }
+        }
+    }
+
+    /// <summary>
+    /// Just a check numeric helper
+    /// </summary>
+    /// <remarks>
+    /// Yeah... I came from VB.NET... old habits die hard...
+    /// </remarks>
+    private bool IsNumeric(string value)
+    {
+        return Regex.IsMatch(value, "^\\d+$");
+    }
+
+    /// <summary>
+    /// Finally, save the node information
+    /// </summary>
+    protected void saveNodeButton_Click(object sender, EventArgs e)
+    {
+        // Clear any previous error messages
+        errorText.Text = null;
+        // Two possibilities, new record or existing node
+        int id = (int)ViewState["EditingNode"];
+        Node n;
+        using (MonadModel context = new MonadModel())
+        {
+            if (id == 0)
+            {
+                // A new record!
+                n = new Node();
+                context.Nodes.Add(n);
+                n.NodeTypeID = int.Parse(newNodeTypeReference.Value);
+                // Set the sequence to be last
+                try
+                {
+                    n.Sequence = context.NodeTypes.First(nt => nt.NodeTypeID == n.NodeTypeID).Nodes.Count + 1;
+                }
+                catch (Exception)
+                {
+                    n.Sequence = 1;
+                }
+            }
+            else
+            {
+                // An existing record - load fresh from the database
+                n = context.Nodes.First(x => x.NodeID == id);
+            }
+            // Set the rest of the fields
+            n.Title = nodeTitle.Text;
+            n.Text = nodeText.Text;
+            n.URL = nodeURL.Text.Trim();
+            try
+            {
+                // Try to save the changes
+                context.SaveChanges();
+                // Go back to the main node listing
+                listNodesScreen.Visible = true;
+                editNodeScreen.Visible = false;
+                editNodesLink_Click(sender, e);
+                errorText.Text = "<p class=\"confirm\">Node Adding/Editing Completed</p>";
+            }
+            catch (Exception ex)
+            {
+                // Get to the last inner exception and display that
+                while (ex.InnerException != null) ex = ex.InnerException;
+                errorText.Text = "<p class=\"error\">An error occured: " + ex.Message + "</p>";
+            }
+        }
+    }
+
+    #endregion
 }

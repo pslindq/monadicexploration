@@ -13,6 +13,6 @@ public partial class LogoutPage : System.Web.UI.Page
         // Clear the session password key
         Session[ConfigurationManager.AppSettings["SessionPasswordKey"]] = null;
         // Go to the homepage
-        Response.Redirect("/default.aspx");
+        Response.Redirect("/default.aspx"); 
     }
 }

@@ -10,7 +10,7 @@ public partial class NodeType
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
     public NodeType()
     {
-        Nodes = new HashSet<Node>();
+        Nodes = new HashSet<Node>(); 
     }
 
     public int NodeTypeID { get; set; }

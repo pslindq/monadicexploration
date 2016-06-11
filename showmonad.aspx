@@ -22,7 +22,7 @@
 </script>
 </head>
 <body onload="init()">
-    <form id="form1" runat="server">
+    <form id="form1" runat="server"> 
         <header>
             <p><a href="/default.aspx">[Home]</a> | <a id="editLink" runat="server" href="admin">[Edit]</a></p>
         </header>

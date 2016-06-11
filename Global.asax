@@ -20,7 +20,7 @@
                 // Go to the login page and request monad password (or master if they have it)
                  Context.RewritePath("/login.aspx?" + ConfigurationManager.AppSettings["MonadQueryStringParam"] + "=" + originalURL.Replace("/admin","").Replace("/",""));
             }
-            else if (originalURL == "/logout")
+            else if (originalURL == "/logout") 
             {
                 // Go to the logout page
                 Context.RewritePath("/logout.aspx?");

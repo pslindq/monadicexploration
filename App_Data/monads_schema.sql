@@ -11,7 +11,7 @@
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [UX_Monads_URLSegment]
-    ON [dbo].[Monads]([URLSegment] ASC);
+    ON [dbo].[Monads]([URLSegment] ASC); 
 
 
 GO

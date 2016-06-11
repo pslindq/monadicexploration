@@ -8,7 +8,7 @@ using System.Web.UI.WebControls;
 
 public partial class LoginPage : System.Web.UI.Page
 {
-    protected void Page_PreRender(object sender, EventArgs e)
+    protected void Page_PreRender(object sender, EventArgs e) 
     {
         // Set the page title to keep postbacks consistent
         this.Title = headingText.Text;

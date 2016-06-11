@@ -22,7 +22,7 @@ public partial class DataJsonPage : System.Web.UI.Page
                 {
                     // Pull and sort by title for ease of finding things first
                     Monad monad = context.Monads.FirstOrDefault(s => s.URLSegment == monadURL);
-                    if (monad == null)
+                    if (monad == null) 
                     {
                         // Nope. Naw. Ain't gonna happen. BONG...
                         Response.StatusCode = 404;

@@ -7,7 +7,7 @@
     <title>Monadic Explorations - Master Logon</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="/src/style.css" rel="stylesheet" />
-    <link href="/app/style.css" rel="stylesheet" />
+    <link href="/app/style.css" rel="stylesheet" /> 
 </head>
 <body>
     <form id="form1" runat="server">

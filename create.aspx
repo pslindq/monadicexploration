@@ -27,7 +27,7 @@
             <asp:RequiredFieldValidator Display="Dynamic" ID="urlSegmentValidator" runat="server" ControlToValidate="urlSegment" SetFocusOnError="true"><span class="required">* Required</span></asp:RequiredFieldValidator>
             <asp:RegularExpressionValidator Display="Dynamic" ID="urlSegmentRegExValidator" runat="server" ControlToValidate="urlSegment" SetFocusOnError="true" ValidationExpression="^[a-zA-Z0-9_-]+$"><span class="required">* Alphanumeric, dash, and underscore characters only</span></asp:RegularExpressionValidator>
         </p>
-        <p>
+        <p> 
             <strong><asp:Label ID="adminPWDLabel" AssociatedControlID="adminPWD" runat="server" Text="Editing Password:"></asp:Label></strong>
             <asp:TextBox ID="adminPWD" runat="server"></asp:TextBox> 
             <asp:RequiredFieldValidator Display="Dynamic" ID="adminPWDValidator" runat="server" ControlToValidate="adminPWD" SetFocusOnError="true"><span class="required">* Required</span></asp:RequiredFieldValidator>

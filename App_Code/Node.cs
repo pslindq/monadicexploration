@@ -11,7 +11,7 @@ public partial class Node
     public Node()
     {
         NodeLinks1 = new HashSet<NodeLink>();
-        NodeLinks2 = new HashSet<NodeLink>();
+        NodeLinks2 = new HashSet<NodeLink>(); 
     }
 
     public int NodeID { get; set; }

@@ -144,7 +144,7 @@
                                             <span class="order"><asp:LinkButton ID="nodeUp" runat="server" OnClick="nodeUp_Click" ToolTip="Move this node up the list">&#8679;</asp:LinkButton>
                                             <asp:LinkButton ID="nodeDown" runat="server" OnClick="nodeDown_Click" ToolTip="Move this node down the list">&#8681;</asp:LinkButton></span>
                                             <asp:LinkButton ID="nodeEdit" Font-Bold="true" runat="server" OnClick="nodeEdit_Click">Name [and color] of Node</asp:LinkButton> 
-                                            <asp:LinkButton ID="nodeRelationsEdit" runat="server" OnClick="nodeRelationsEdit_Click">[3 Associations]</asp:LinkButton>
+                                            <asp:LinkButton ID="nodeRelationsEdit" runat="server" OnClick="nodeRelationsEdit_Click">[# Association(s)]</asp:LinkButton>
                                         </li>
                                 </ItemTemplate>
                                 <FooterTemplate>
@@ -183,7 +183,7 @@
                 <em>This field is optional. Leave it blank, select a local file, or paste/type<br /> in the Internet link you which the node title to point to.</em>
              </p>
             <p>
-                <asp:Button ID="saveNodeButton" CausesValidation="true" runat="server" Text="Save the Updated Information" />
+                <asp:Button ID="saveNodeButton" CausesValidation="true" runat="server" OnClick="saveNodeButton_Click" Text="Save the Updated Information" />
                 <asp:HiddenField ID="newNodeTypeReference" runat="server" />
                 or
                 <asp:Button ID="deleteNodeButton" OnClick="deleteNodeButton_Click" CausesValidation="false" runat="server" Text="Delete this Node" />
@@ -230,6 +230,44 @@
             </p>
         </asp:Panel>
         <asp:Panel ID="linkSelectScreen" runat="server" Visible="false" CssClass="editscrn">
+            <p>Select the nodes to you wish to relate the node entitled 
+                <strong><asp:Literal ID="associateToNodeName" runat="server"></asp:Literal></strong>
+                to using the checkboxes below.  Items already checked 
+                indicate a pre-existing association.
+            </p>
+            <asp:Repeater ID="nodeTypeLinkingRepeater" runat="server" OnItemDataBound="nodeTypeLinkingRepeater_ItemDataBound">
+                <HeaderTemplate>
+                    <ul>
+                </HeaderTemplate>
+                <ItemTemplate>
+                        <li>
+                            <p><strong><asp:Literal runat="server" ID="nodeTypeName" Mode="PassThrough"></asp:Literal></strong></p>
+                            <asp:Repeater ID="nodeListLinking" runat="server" OnItemDataBound="nodeListLinking_ItemDataBound">
+                                <HeaderTemplate>
+                                    <ul>
+                                </HeaderTemplate>
+                                <ItemTemplate> 
+                                        <li>
+                                            <asp:CheckBox ID="linkNodeFlag" TextAlign="Right" Text="Node Name" ForeColor="Window" runat="server" />
+                                            <asp:HiddenField ID="linkID" runat="server" />
+                                            <asp:HiddenField ID="nodeID" runat="server" />
+                                        </li>
+                                </ItemTemplate>
+                                <FooterTemplate>
+                                    </ul>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </li>
+                </ItemTemplate>
+                <FooterTemplate>
+                    </ul>
+                </FooterTemplate>
+            </asp:Repeater>
+            <p>
+                <asp:Button ID="saveNodeLinkingButton" CausesValidation="true" OnClick="saveNodeLinkingButton_Click" runat="server" Text="Save the Linking Information" />
+                or
+                <asp:Button ID="cancelNodeLinkingButton" OnClick="cancelButton_Click" CausesValidation="false" runat="server" Text="Cancel Linking" />
+            </p>
         </asp:Panel>
         <p>or <asp:Button ID="cancelButton" CausesValidation="false" runat="server" OnClick="cancelAllButton_Click" Text="Cancel" /> all editing and return to the visualization.</p>
     </form>

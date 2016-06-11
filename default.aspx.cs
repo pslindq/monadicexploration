@@ -19,7 +19,7 @@ public partial class DefaultHomePage : System.Web.UI.Page
                          select s;
             monads = monads.OrderBy(s => s.Title);
             availableMonads.DataSource = monads.ToArray();
-            availableMonads.DataBind();
+            availableMonads.DataBind(); 
         }
     }
 

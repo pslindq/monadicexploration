@@ -15,7 +15,7 @@
         <asp:Repeater ID="availableMonads" runat="server" OnItemDataBound="availableMonads_ItemDataBound">
             <HeaderTemplate>
                 <ul>
-                    <li><a href="/admin">[Create New]</a></li>
+                    <li><a href="/admin">[Create New]</a></li> 
             </HeaderTemplate>
             <ItemTemplate>
                     <li><a runat="server" id="anchor"></a></li>

@@ -14,7 +14,7 @@ Other Project References
 [.NET Json serialization via Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)  
 [Entity Framework v6.1.3](https://msdn.microsoft.com/en-us/data/ef.aspx)
 
-
+ 
 **Marian Dörk's Original README follows:**
 
 Monadic Exploration

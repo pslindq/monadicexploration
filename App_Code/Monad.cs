@@ -10,7 +10,7 @@ public partial class Monad
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
     public Monad()
     {
-        NodeTypes = new HashSet<NodeType>();
+        NodeTypes = new HashSet<NodeType>(); 
     }
 
     public int MonadID { get; set; }
